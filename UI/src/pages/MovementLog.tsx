@@ -1,19 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Filter, ArrowDown, ArrowUp, Package, User, Printer, Trash2 } from 'lucide-react';
-import { useReactToPrint } from 'react-to-print';
+import React, { useState, useEffect } from 'react';
+import { Filter, ArrowDown, ArrowUp, Package, User, Trash2 } from 'lucide-react';
 import { Table } from '../components/Table';
-import { PrintableReport } from '../components/PrintableReport';
 import { AsyncPaginate, LoadOptions } from 'react-select-async-paginate';
 import type { GroupBase, OptionsOrGroups } from 'react-select';
 import { Item as SharedItem, MovementLogEntry, Unit as Destination, Provider } from '../types';
-
-// Ensure you have installed react-select-async-paginate and its peer dependency react-select
-// npm install react-select-async-paginate react-select
-// or
-// yarn add react-select-async-paginate react-select
-
-// Define BackendItem type based on what /api/items/ranged returns
-// interface BackendItem { ... } - REMOVED
+import { PrintReportButton } from '../components/PrintReportButton';
 
 // Define ItemOption for react-select-async-paginate
 interface ItemOption {
@@ -30,9 +21,6 @@ interface LoadAdditional {
 const ITEMS_PER_PAGE = 50; // Page size for fetching items
 
 const AsyncPaginateComponent = AsyncPaginate as any; // Workaround for TS2786
-
-// Mock data for demonstration
-// const mockLogs = Array.from({ length: 50 }, (_, i) => ({ ... }));
 
 // Helper to format date for display
 const formatDate = (dateString: string) => {
@@ -79,14 +67,6 @@ export const MovementLog = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [totalLogs, setTotalLogs] = useState(0);
   const logsPerPage = 15;
-
-  // State and ref for printing
-  const [printableData, setPrintableData] = useState<MovementLogEntry[]>([]);
-  const printComponentRef = useRef<HTMLDivElement>(null);
-
-  const handlePrint = useReactToPrint({
-    contentRef: printComponentRef,
-  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -178,47 +158,6 @@ export const MovementLog = () => {
       setLogs([]);
       setTotalPages(0);
       setTotalLogs(0);
-    } finally {
-      setLogsLoading(false);
-    }
-  };
-
-  const prepareAndPrint = async () => {
-    // 1. Show a loading indicator if desired
-    setLogsLoading(true); // Reuse existing loading state
-    setLogsError(null);
-
-    // 2. Fetch all data using the new endpoint
-    const params = new URLSearchParams();
-    if (filters.fromDate) params.append('date_from', filters.fromDate);
-    if (filters.toDate) params.append('date_to', filters.toDate);
-    if (filters.itemId) params.append('item_id', filters.itemId);
-    if (filters.providerId) params.append('provider_id', filters.providerId);
-    if (filters.destinationId) params.append('destination_id', filters.destinationId);
-
-    try {
-      const response = await fetch(`/api/movement-logs/all_filtered?${params.toString()}`);
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || errorData.error || 'Failed to fetch data for printing');
-      }
-      const allLogs = await response.json();
-      
-      // 3. Set the data and trigger print
-      if (allLogs && allLogs.length > 0) {
-        setPrintableData(allLogs);
-        // Use a timeout to allow state to update before printing
-        setTimeout(() => {
-          handlePrint();
-        }, 50);
-      } else {
-        // Optional: Show a message if there's nothing to print
-        setLogsError("لا توجد بيانات للطباعة بناءً على الفلاتر المحددة.");
-      }
-
-    } catch (err: any) {
-      console.error("Error preparing for print:", err);
-      setLogsError(err.message || "فشل في تحضير البيانات للطباعة.");
     } finally {
       setLogsLoading(false);
     }
@@ -466,14 +405,10 @@ export const MovementLog = () => {
               <Trash2 size={16} className="ml-2 rtl:mr-2 rtl:ml-0" />
               مسح
             </button>
-            <button
-              onClick={prepareAndPrint}
-              className="btn btn-outline"
+            <PrintReportButton
+              filters={filters}
               disabled={!filtersApplied || logs.length === 0}
-            >
-              <Printer size={16} className="ml-2 rtl:mr-2 rtl:ml-0" />
-              طباعة النتائج
-            </button>
+            />
           </div>
         </div>
       </div>
@@ -544,11 +479,6 @@ export const MovementLog = () => {
           />
         </>
       )}
-
-      {/* Hidden component for printing */}
-      <div style={{ display: 'none' }}>
-        <PrintableReport ref={printComponentRef} data={printableData} />
-      </div>
     </div>
   );
 };

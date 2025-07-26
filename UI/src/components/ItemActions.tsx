@@ -16,7 +16,7 @@ export const ItemActions: React.FC<ItemActionsProps> = ({ item, onAdjust, onEdit
   };
 
   return (
-    <div className="flex items-center justify-start gap-2" dir="ltr">
+    <div className="flex items-center justify-end gap-2 " dir="ltr">
       {/* Edit Button */}
       <button 
         onClick={(e) => handleActionClick(e, () => onEdit(item))}
@@ -37,7 +37,7 @@ export const ItemActions: React.FC<ItemActionsProps> = ({ item, onAdjust, onEdit
       </button>
 
       {/* Toggle Status Button */}
-      <button 
+      { <button 
         onClick={(e) => handleActionClick(e, () => onToggleStatus(item))}
         className="btn btn-ghost btn-sm btn-circle"
         title={item.status === 'active' ? 'تعيين كـ "غير نشط"' : 'تعيين كـ "نشط"'}
@@ -45,7 +45,7 @@ export const ItemActions: React.FC<ItemActionsProps> = ({ item, onAdjust, onEdit
         {item.status === 'active' 
           ? <ToggleRight size={16} className="text-success" /> 
           : <ToggleLeft size={16} className="text-error" />}
-      </button>
+      </button> }
     </div>
   );
 }; 

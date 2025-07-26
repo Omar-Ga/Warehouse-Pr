@@ -266,20 +266,11 @@ export const ProviderManagement: React.FC = () => {
       )}
 
       {providers.length === 0 && !loading && !error && (
-        <div className="text-center p-8 border-2 border-dashed border-base-300 rounded-lg">
-          <h3 className="text-xl font-semibold text-base-500">لا يوجد موردون</h3>
-          <p className="text-base-400 mt-2 mb-4">
-            ابدأ بإضافة مورد جديد لإدارة أصنافك.
-          </p>
-          <button 
-            className="btn btn-primary"
-            onClick={() => {
-              setModalApiError(null);
-              setIsAddModalOpen(true);
-            }}
-          >
-            <Plus size={18} className="ml-2" />
-            إضافة مورد أول
+        <div className="text-center py-12 bg-white rounded-lg shadow">
+          <h3 className="text-lg font-medium text-gray-700">لا يوجد موردين بعد</h3>
+          <p className="text-gray-500 mb-4">أضف الموردين الذين يتم شراء الأصناف منهم</p>
+          <button className="btn btn-primary" onClick={() => { setModalApiError(null); setIsAddModalOpen(true); }}>
+            إضافة مورد جديد
           </button>
         </div>
       )}
